@@ -1,0 +1,56 @@
+---
+ - name: create user if the condition is good
+   hosts: webservers
+   become: true
+   remote_user: automation
+   vars_files:
+   - /home/automation/plays/vars/user_list.yml
+   - /home/automation/plays/secret.yml 
+   tasks:
+   - name: begin creating user "{{item.username}}"
+     user:
+       name: "{{item.username}}"
+       uid: "{{item.uid}}"
+       password: "{{ user_password | password_hash('sha512') }}"
+       shell: /bin/bash
+       groups: wheel
+     with_items:
+     - "{{users}}"
+     when: "{{item.uid < 2000}} "
+   - name: copy authorized key to all node
+     authorized_key:
+       user: "{{item.username}}"
+       state: present
+       key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
+     with_items:
+     - "{{users}}"
+     when: "{{item.uid < 2000}} "
+
+ - name: create user if the condition is good
+   hosts: database
+   become: true
+   remote_user: automation
+   vars_files:
+   - /home/automation/plays/vars/user_list.yml
+   - /home/automation/plays/secret.yml
+   tasks:
+   - name: begin creating user "{{item.username}}"
+     user:
+       name: "{{item.username}}"
+       uid: "{{item.uid}}"
+       password: "{{ user_password | password_hash('sha512') }}"
+       shell: /bin/bash
+       groups: wheel
+     with_items:
+     - "{{users}}"
+     when: "{{item.uid > 1999}} "
+   - name: copy authorized key to all node
+     authorized_key:
+       user: "{{item.username}}"
+       state: present
+       key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
+     with_items:
+     - "{{users}}"
+     when: "{{item.uid > 1999}} " 
+
+ 

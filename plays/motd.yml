@@ -1,0 +1,36 @@
+---
+ - name: replace any existing content of /etc/motd on proxy group
+   hosts: proxy
+   become: true
+   remote_user: automation
+  
+   tasks:
+   - name : insert haproxy
+     lineinfile:
+       path: /etc/motd
+       line: Welcome to HAProxy server
+
+ - name: replace any existing content of /etc/motd on webservers group
+   hosts: webservers
+   become: true
+   remote_user: automation
+
+   tasks:
+   - name : insert apach
+     lineinfile:
+       path: /etc/motd
+       line: Welcome to Apache server   
+
+ - name: replace any existing content of /etc/motd on database group
+   hosts: database
+   become: true
+   remote_user: automation
+
+   tasks:
+   - name : insert mysql
+     lineinfile:
+       path: /etc/motd
+       line: Welcome to MySQL server
+  
+
+  

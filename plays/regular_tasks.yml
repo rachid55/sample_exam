@@ -1,0 +1,12 @@
+---
+ - name: regular tasks
+   hosts: database
+   become: true
+   remote_user: automation
+   tasks:
+   - name: planifier le tache dans crontab
+     cron:
+       name: "insert date"
+       minute: "0"
+       hour: "1"
+       job: "date > /var/log/time.log"

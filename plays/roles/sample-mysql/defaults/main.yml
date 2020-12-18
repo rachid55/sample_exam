@@ -1,0 +1,98 @@
+---
+# defaults file for sample-mysql
+
+# A primary partition number 1 of size 800MB on device /dev/sdb
+ - name: Create a new primary partition with a size of 800GiB
+   community.general.parted:
+     device: /dev/sdb
+     number: 1
+     state: present
+     part_end: 800MB
+
+# create a group volum on top /dev/sdb
+ - name: Create a volume group on top of /dev/sdb with physical extent size = 800MB
+   community.general.lvg:
+     vg: vg_database
+     pvs: /dev/sdb
+     pesize: 800MB
+
+# create logical volum 
+ - name: Create a logical volume of 512m
+   community.general.lvol:
+     vg: vg_database
+     lv: lv_mysql
+     size: 800MB
+
+# format partition to xfs
+ - name: format the file system of logical volum to xfs
+   community.general.parted:
+     device: /dev/vg_database/lv_mysql
+     state: present
+     fs_type: xfs
+
+# create the directory for mounting our logical volum
+ - name: create our directory
+   file:
+     path: /mnt/mysql_backups
+     stat: directory
+
+
+# mount the logiqual volum
+ - name: Mount and bind a volume
+   mount:
+     path: /dev/vg_database/lv_mysql
+     src:  /mnt/mysql_backups
+     state: mounted
+     fstype: xfs
+
+# firewalld configuration
+ - name: add the port 3306/tcp to firewalld 
+   - firewalld:
+       port: 3306/TCP
+       permanent: yes
+       state: enabled
+       immediate: yes
+
+ - name: MySQL | Set the root password.
+   mysql_user: 
+     name: root 
+     host: localhost
+     password: {{ mysql_root_password }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
